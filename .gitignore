@@ -1,0 +1,49 @@
+# ---- Python 编译产物 ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ---- 虚拟环境 ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- 打包 / 发布 ----
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# ---- 测试与覆盖率 ----
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.mypy_cache/
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- 系统文件 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 本工具的运行时数据 ----
+# 数据库、频率护栏状态、导出结果都含个人信息,绝不入库
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+rate_state.json
+data/
+export*.csv
+result*.csv

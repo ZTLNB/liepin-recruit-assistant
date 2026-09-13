@@ -1,0 +1,6 @@
+﻿姓名,年限,学历,当前职位,当前公司,技能,简历正文,来源
+张伟,5,硕士,高级后端工程师,某电商公司,Python|MySQL|Redis|Docker|Kafka,"精通Python高并发开发,熟悉MySQL与Redis调优,用过Docker和Kafka,参与过微服务改造",猎聘
+李娜,2,本科,后端开发工程师,某创业公司,Python|MySQL,"熟悉Python和MySQL,了解Redis",猎聘
+王强,8,博士,技术专家,某大厂,Python|MySQL|Redis|Docker|Kubernetes|Kafka|Flink,"深耕分布式系统,精通Python全栈,主导过K8s容器化与Flink实时计算,有大模型应用落地经验",猎聘
+赵敏,4,大专,后端工程师,某外包公司,Java|MySQL,"主要用Java做后端,会MySQL",猎聘
+孙涛,6,本科,资深工程师,某金融科技,Python|Redis|Docker|Kubernetes|大模型,"6年Python经验,熟悉Redis和Docker,做过K8s运维,参与大模型应用开发",猎聘
