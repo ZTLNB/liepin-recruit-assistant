@@ -43,3 +43,45 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-v --tb=short"
+
+[tool.ruff]
+# 项目声明支持 3.9,所以 lint 也按 3.9 的语法边界来查 —— 否则 3.10+ 才有的
+# 写法会悄悄溜进来,只在别人的旧解释器上炸。行长度沿用 ruff 默认值(88):
+# E501 没有开启,长中文注释不受影响。
+target-version = "py39"
+
+[tool.ruff.lint]
+# 规则集是"实测已全部通过"的那个子集,而不是一次开满 ——
+# 让 lint 从第一天起就是绿的,比开满规则然后长期挂着上百个告警有用。
+#
+# 刻意没开的几组:
+#   UP  —— pyupgrade 会改写既有写法,属于风格迁移而非缺陷修复
+#   RUF —— 主要是 RUF022(`__all__` 未排序)之类的整理项
+#   SIM —— 简化建议,不影响正确性
+#   E5  —— E501 行长度,见上面的说明
+select = [
+    "E4",   # pycodestyle:导入相关
+    "E7",   # pycodestyle:语句相关(如 == None)
+    "E9",   # pycodestyle:运行时错误(如语法错误)
+    "F",    # pyflakes:未定义名、未使用导入、重复定义
+    "I",    # isort:导入排序
+    "W",    # pycodestyle:空白字符
+    "C4",   # flake8-comprehensions
+    "N",    # pep8-naming
+    "B",    # flake8-bugbear:通常是真 bug 的写法
+]
+ignore = ["E501"]
+
+[tool.mypy]
+# 这里写 3.10 而不是 3.9:新版本 mypy 已经不再支持把 python_version 设为 3.9
+# ("must be 3.10 or higher")。3.9 的语法边界改由 ruff 的 target-version = "py39"
+# 守护 —— 两者合起来覆盖了"语法能用"和"类型正确"这两件事。
+python_version = "3.10"
+files = ["src/recruit_assistant"]
+# 目标是"先让注解可信",不是一次到位。
+# disallow_untyped_defs 暂未开启:打开后 src 下还有 20 处缺注解(集中在
+# cli.py 的参数上)。补注解是一次独立的改动,不适合塞进"加 CI"这一个提交。
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+show_error_codes = true
