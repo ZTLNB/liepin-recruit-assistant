@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import sys
 from pathlib import Path
 
@@ -580,7 +581,34 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _make_output_resilient() -> None:
+    """别让控制台编码决定命令能不能跑完。
+
+    这个 CLI 的界面全是中文。Windows 上 stdout/stderr 一旦不是控制台
+    (被管道或文件接管),Python 用的就是 locale 编码而不是宽字符 API;
+    英文 Windows 的 locale 是 cp1252,一打中文就 UnicodeEncodeError。
+
+    最直接的受害者是 ``recruit --help``:argparse 把帮助文本写 stdout,
+    在英文 Windows 上(以及任何 ``recruit --help | more`` 的场景)直接崩。
+    用户拿到工具的第一个命令就失败,而且报的是编码栈,看不出跟工具有关。
+
+    这里只把错误处理换成 replace,保留控制台原有编码:编不出来的字符退化成
+    ?,而不是让整个程序失败。强制改成 UTF-8 会更糟 —— 中文 Windows 的
+    cp936 控制台会显示乱码。
+    """
+    for stream in (sys.stdout, sys.stderr):
+        # 用 isinstance 而不是 hasattr:sys.stdout 的静态类型是 TextIO | Any,
+        # 直接调 reconfigure 会被类型检查器判成 union-attr;而测试里被替换成
+        # StringIO 的流本来也不该有这个方法,跳过才是对的。
+        if isinstance(stream, io.TextIOWrapper):
+            try:
+                stream.reconfigure(errors="replace")
+            except (ValueError, OSError):  # 流已关闭或已分离
+                pass
+
+
 def main(argv: list[str] | None = None) -> int:
+    _make_output_resilient()
     parser = build_parser()
     args = parser.parse_args(argv)
 

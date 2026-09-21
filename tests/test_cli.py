@@ -2,6 +2,8 @@
 
 import contextlib
 import io
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -10,6 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from recruit_assistant.cli import main  # noqa: E402
+
+SRC = Path(__file__).resolve().parent.parent / "src"
 
 
 def run_cli(*argv) -> tuple[int, str]:
@@ -357,6 +361,54 @@ class TestReportAndExport(CliTestCase):
                             "export", "--job", "岗位", "--out", str(self.dir / "y.csv"))
         self.assertEqual(code, 0)
         self.assertIn("没有可导出", out)
+
+
+class TestConsoleEncoding(unittest.TestCase):
+    """控制台编码不该决定命令能不能跑完。
+
+    界面文本全是中文,而 Windows 上 stdout 一旦不是控制台(管道 / 文件),
+    Python 用的就是 locale 编码。英文 Windows 的 locale 是 cp1252,编不出
+    中文 —— GitHub 的 windows-latest runner 正是这个组合,`recruit --help`
+    在那里直接抛 UnicodeEncodeError。
+
+    这几个用例必须在子进程里跑:同进程内的 sys.stdout 已经被替换成
+    StringIO,根本走不到真实的编码环节。
+    """
+
+    def _run(self, *argv: str) -> subprocess.CompletedProcess:
+        env = dict(os.environ, PYTHONIOENCODING="cp1252")
+        env["PYTHONPATH"] = str(SRC)
+        return subprocess.run(
+            [sys.executable, "-m", "recruit_assistant", *argv],
+            capture_output=True,
+            env=env,
+        )
+
+    def test_help_survives_a_console_that_cannot_encode_chinese(self):
+        proc = self._run("--help")
+        self.assertEqual(
+            proc.returncode,
+            0,
+            "在 cp1252 控制台下 --help 崩了:\n"
+            + proc.stderr.decode("utf-8", "replace")[-800:],
+        )
+        self.assertIn(b"usage:", proc.stdout.lower())
+
+    def test_real_command_survives_the_same_console(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proc = self._run(
+                "--db", str(Path(tmp) / "a.db"),
+                "--rate-state", str(Path(tmp) / "r.json"),
+                "init",
+            )
+            self.assertEqual(
+                proc.returncode,
+                0,
+                "在 cp1252 控制台下 init 崩了:\n"
+                + proc.stderr.decode("utf-8", "replace")[-800:],
+            )
+            # 修的是输出编码,不是行为:数据目录必须真的建出来
+            self.assertTrue((Path(tmp) / "a.db").exists())
 
 
 if __name__ == "__main__":
