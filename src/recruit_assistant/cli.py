@@ -31,7 +31,7 @@ from .adapters import ManualImportSource
 from .jd import parse_jd
 from .matcher import rank_candidates, score_candidate
 from .message import TEMPLATES, build_batch, build_message, list_templates
-from .models import Candidate, CandidateStatus, JobProfile
+from .models import Candidate, CandidateStatus, JobProfile, MatchResult
 from .ratelimit import RateLimiter
 from .report import build_report
 from .store import Store
@@ -306,7 +306,7 @@ def cmd_message_batch(args) -> int:
         if not matches:
             raise SystemExit("错误:没有匹配记录,请先运行 `recruit match`。")
 
-        pairs: list[tuple[Candidate, object]] = []
+        pairs: list[tuple[Candidate, MatchResult]] = []
         for match in matches[: args.limit]:
             cand = store.get_candidate(match.candidate_id)
             if cand:
@@ -364,7 +364,7 @@ def cmd_message_approve(args) -> int:
     _out(f"✅ 草稿 {draft.id} 已确认,可以发送了。")
     _out("")
     _out("请到猎聘客户端**手动**把上面这段话发给候选人。")
-    _out(f"发送完成后,执行以下命令登记:")
+    _out("发送完成后,执行以下命令登记:")
     _out(f"     recruit message sent {draft.id}")
     return 0
 

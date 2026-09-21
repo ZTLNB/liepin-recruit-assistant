@@ -22,7 +22,7 @@ class RateLimiterTestCase(unittest.TestCase):
         self._tmp.cleanup()
 
     def make(self, **kw) -> RateLimiter:
-        defaults = dict(max_per_hour=5, min_interval_seconds=60)
+        defaults = {"max_per_hour": 5, "min_interval_seconds": 60}
         defaults.update(kw)
         return RateLimiter(self.state, **defaults)
 

@@ -16,27 +16,27 @@ from recruit_assistant.models import Candidate, JobProfile  # noqa: E402
 
 def make_job(**kw) -> JobProfile:
     """构造一个可控的岗位画像,避免依赖 JD 解析结果。"""
-    defaults = dict(
-        title="后端工程师",
-        skills=["Python", "MySQL", "Redis"],
-        nice_to_have=[],
-        min_years=3.0,
-        max_years=None,
-        education="本科",
-        keywords=[],
-    )
+    defaults = {
+        "title": "后端工程师",
+        "skills": ["Python", "MySQL", "Redis"],
+        "nice_to_have": [],
+        "min_years": 3.0,
+        "max_years": None,
+        "education": "本科",
+        "keywords": [],
+    }
     defaults.update(kw)
     return JobProfile(**defaults)
 
 
 def make_candidate(**kw) -> Candidate:
-    defaults = dict(
-        name="张三",
-        skills=["Python", "MySQL", "Redis"],
-        years=5.0,
-        education="本科",
-        resume_text="Python MySQL Redis",
-    )
+    defaults = {
+        "name": "张三",
+        "skills": ["Python", "MySQL", "Redis"],
+        "years": 5.0,
+        "education": "本科",
+        "resume_text": "Python MySQL Redis",
+    }
     defaults.update(kw)
     return Candidate(**defaults)
 
